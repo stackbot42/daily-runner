@@ -21,6 +21,13 @@ jobs:
         with:
           python-version: '3.10'
 
+      # ✅ Cache Playwright (IMPORTANT)
+      - name: Cache Playwright
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-cache
+
       - name: Run corejob
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
@@ -31,7 +38,7 @@ jobs:
           cd corejob-scraper
           pip install -r requirements.txt
           pip install playwright
-          playwright install --with-deps
+          playwright install chromium
           python scraper.py
 
       # ---------- JOB DRILLER ----------
@@ -62,6 +69,6 @@ jobs:
         run: |
           cd Private-Jobs-Scrapper
           npm install
-          node server.js &
+          PORT=4000 node server.js &
           sleep 5
-          curl http://localhost:3000/run
+          curl http://localhost:4000/run
