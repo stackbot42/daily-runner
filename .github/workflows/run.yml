@@ -33,7 +33,7 @@ jobs:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
           COREJOB_EMAIL: ${{ secrets.COREJOB_EMAIL }}
-          COREJOB_PASSWORD: ${{ secrets.COREJOB_EMAIL }}
+          COREJOB_PASSWORD: ${{ secrets.COREJOB_PASSWORD }}
         run: |
           cd corejob-scraper
           pip install -r requirements.txt
