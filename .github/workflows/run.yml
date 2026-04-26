@@ -1,0 +1,67 @@
+name: Daily Task
+
+on:
+  schedule:
+    - cron: '30 4 * * *'
+  workflow_dispatch:
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+
+    steps:
+
+      # ---------- COREJOB ----------
+      - name: Clone corejob
+        run: |
+          git clone https://x-access-token:${{ secrets.TOKEN }}@github.com/quickwisestack/corejob-scraper.git
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Run corejob
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+          COREJOB_EMAIL: ${{ secrets.COREJOB_EMAIL }}
+          COREJOB_PASSWORD: ${{ secrets.COREJOB_PASSWORD }}
+        run: |
+          cd corejob-scraper
+          pip install -r requirements.txt
+          pip install playwright
+          playwright install --with-deps
+          python scraper.py
+
+      # ---------- JOB DRILLER ----------
+      - name: Clone job-driller
+        run: |
+          git clone https://x-access-token:${{ secrets.TOKEN }}@github.com/quickwisestack/job-driller-pro.git
+
+      - name: Run job-driller
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+        run: |
+          cd job-driller-pro
+          npm install
+          node server.js &
+          sleep 5
+          curl http://localhost:3000/run
+
+      # ---------- PRIVATE JOBS ----------
+      - name: Clone private jobs
+        run: |
+          git clone https://x-access-token:${{ secrets.TOKEN }}@github.com/quickwisestack/Private-Jobs-Scrapper.git
+
+      - name: Run private jobs
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+        run: |
+          cd Private-Jobs-Scrapper
+          npm install
+          node server.js &
+          sleep 5
+          curl http://localhost:3000/run
