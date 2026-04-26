@@ -2,7 +2,7 @@ name: Daily Task
 
 on:
   schedule:
-    - cron: '30 4 * * *'
+    - cron: '30 4 * * *'   # 10:00 AM IST = 04:30 UTC
   workflow_dispatch:
 
 jobs:
@@ -11,7 +11,8 @@ jobs:
 
     steps:
 
-      # ---------- COREJOB ----------
+      # ── COREJOB (Python + Playwright) ──────────────────────────────────
+
       - name: Clone corejob
         run: |
           git clone https://x-access-token:${{ secrets.TOKEN }}@github.com/quickwisestack/corejob-scraper.git
@@ -21,12 +22,19 @@ jobs:
         with:
           python-version: '3.10'
 
-      # ✅ Cache Playwright (IMPORTANT)
-      - name: Cache Playwright
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/ms-playwright
-          key: playwright-cache
+      - name: Install corejob dependencies
+        run: |
+          cd corejob-scraper
+          pip install -r requirements.txt
+          pip install playwright
+
+      - name: Install Playwright browsers WITH system dependencies
+        run: |
+          cd corejob-scraper
+          playwright install --with-deps chromium
+        # ^^^ THIS IS THE CRITICAL FIX
+        # --with-deps installs all required OS libraries (libgbm, libasound2, etc.)
+        # Without this, Chromium launches but crashes silently during login
 
       - name: Run corejob
         env:
@@ -34,17 +42,22 @@ jobs:
           SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
           COREJOB_EMAIL: ${{ secrets.COREJOB_EMAIL }}
           COREJOB_PASSWORD: ${{ secrets.COREJOB_PASSWORD }}
+          # Force Playwright to use the installed browser, not a system one
+          PLAYWRIGHT_BROWSERS_PATH: /home/runner/.cache/ms-playwright
         run: |
           cd corejob-scraper
-          pip install -r requirements.txt
-          pip install playwright
-          playwright install chromium
           python scraper.py
 
-      # ---------- JOB DRILLER ----------
+      # ── JOB DRILLER (Node.js) ──────────────────────────────────────────
+
       - name: Clone job-driller
         run: |
           git clone https://x-access-token:${{ secrets.TOKEN }}@github.com/quickwisestack/job-driller-pro.git
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
 
       - name: Run job-driller
         env:
@@ -54,10 +67,13 @@ jobs:
           cd job-driller-pro
           npm install
           node server.js &
-          sleep 5
-          curl http://localhost:3000/run
+          SERVER_PID=$!
+          sleep 10
+          curl --fail --retry 3 --retry-delay 5 http://localhost:3000/run
+          kill $SERVER_PID || true
 
-      # ---------- PRIVATE JOBS ----------
+      # ── PRIVATE JOBS (Node.js) ─────────────────────────────────────────
+
       - name: Clone private jobs
         run: |
           git clone https://x-access-token:${{ secrets.TOKEN }}@github.com/quickwisestack/Private-Jobs-Scrapper.git
@@ -70,10 +86,13 @@ jobs:
           cd Private-Jobs-Scrapper
           npm install
           PORT=4000 node server.js &
-          sleep 5
-          curl http://localhost:4000/run
+          SERVER_PID=$!
+          sleep 10
+          curl --fail --retry 3 --retry-delay 5 http://localhost:4000/run
+          kill $SERVER_PID || true
 
-      # ---------- TELEGRAM ----------
+      # ── TELEGRAM INGESTION (Node.js) ───────────────────────────────────
+
       - name: Clone telegram
         run: |
           git clone https://x-access-token:${{ secrets.TOKEN }}@github.com/quickwisestack/telegram-ingestion.git
