@@ -49,15 +49,16 @@ jobs:
           python scraper.py
 
       # ── JOB DRILLER (Node.js) ──────────────────────────────────────────
-
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          
       - name: Clone job-driller
         run: |
           git clone https://x-access-token:${{ secrets.TOKEN }}@github.com/quickwisestack/job-driller-pro.git
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '18'
+      
 
       - name: Run job-driller
         env:
