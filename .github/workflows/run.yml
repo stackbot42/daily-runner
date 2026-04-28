@@ -25,7 +25,7 @@ jobs:
 
       - name: Clone job-driller
         run: |
-          git clone https://x-access-token:${{ secrets.TOKEN }}@github.com/quickwisestack/job-driller-pro.git
+          git clone https://x-access-token:${{ secrets.TOKEN }}@github.com/stackbot42/job-driller-pro.git
 
       - name: Run job-driller
         env:
@@ -47,7 +47,7 @@ jobs:
       # PRIVATE JOBS
       - name: Clone private jobs
         run: |
-          git clone https://x-access-token:${{ secrets.TOKEN }}@github.com/quickwisestack/Private-Jobs-Scrapper.git
+          git clone https://x-access-token:${{ secrets.TOKEN }}@github.com/stackbot42/Private-Jobs-Scrapper.git
 
       - name: Run private jobs
         env:
@@ -66,7 +66,7 @@ jobs:
       # TELEGRAM
       - name: Clone telegram
         run: |
-          git clone https://x-access-token:${{ secrets.TOKEN }}@github.com/quickwisestack/telegram-ingestion.git
+          git clone https://x-access-token:${{ secrets.TOKEN }}@github.com/stackbot42/telegram-ingestion.git
 
       - name: Run telegram ingestion
         env:
@@ -85,7 +85,7 @@ jobs:
 
       - name: Clone corejob
         run: |
-          git clone https://x-access-token:${{ secrets.TOKEN }}@github.com/quickwisestack/corejob-scraper.git
+          git clone https://x-access-token:${{ secrets.TOKEN }}@github.com/stackbot42/corejob-scraper.git
 
       - name: Install corejob dependencies
         run: |
